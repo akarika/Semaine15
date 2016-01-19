@@ -1,3 +1,5 @@
+#JEU DE COMBAT DANS LA CONSOLE - TP OPEN CLASSROOMS
+
 class Personne
   attr_accessor :nom, :points_de_vie, :en_vie
 
@@ -8,41 +10,40 @@ class Personne
   end
 
   def info
-    # A faire:
-    # - Renvoie le nom et les points de vie si la personne est en vie
     if @en_vie
-      return "#{nom} a #{@points_de_vie} de pv"
-    # - Renvoie le nom et "vaincu" si la personne a été vaincue
-  else
-    return "#{nom} a été vaincu"
-  end
-
+    	return "#{@nom} (#{@points_de_vie.to_s} /100 pts de vie)"
+    else
+    	return @nom + " vaincu"
+    end
   end
 
   def attaque(personne)
-    # A faire:
-    # - Fait subir des dégats à la personne passée en paramètre
-   personne.points_de_vie=personne.degats
-    # - Affiche ce qu'il s'est passé
-    puts "#{personne.nom} a subit des dégats de #{@nom}"
+  # Le joueur attaque la personne passée en paramètre
+    puts "#{@nom} attaque #{personne.nom}"
+
+    if personne.en_vie
+    	personne.subit_attaque(degats)
+    else
+    	puts "#{personne.nom} a déjà été vaincu"
+    end
   end
 
+
   def subit_attaque(degats_recus)
-    # A faire:
-    # - Réduit les points de vie en fonction des dégats reçus
+  # Le joueur attaqué perd des points de vie en fonction des dégâts reçus
     @points_de_vie -= degats_recus
-    # - Affiche ce qu'il s'est passé
-    puts "#{@nom} a reçu #{degats_recus} de dégats"
-    # - Détermine si la personne est toujours en_vie ou non
-return @en_vie=false if @points_de_vie<=0
+    puts "#{nom} vient de subir #{degats_recus} points de dégâts"
+  # On vérifie si la personne attaquée est toujours en vie
+    puts "#{@nom} a été vaincu" if @points_de_vie <= 0
   end
+
 end
 
 class Joueur < Personne
   attr_accessor :degats_bonus
 
   def initialize(nom)
-    # Par défaut le joueur n'a pas de dégats bonus
+    # Par défaut le joueur n'a pas de dégâts bonus
     @degats_bonus = 0
 
     # Appelle le "initialize" de la classe mère (Personne)
@@ -50,41 +51,36 @@ class Joueur < Personne
   end
 
   def degats
-    # A faire:
-    # - Calculer les dégats
-    degats=99
-    # - Affiche ce qu'il s'est passé
-    return"#{nom} a fait #{degats} de dégats"
+  # Les dégâts sont variables à chaque attaque
+    degats = rand(1..20) + degats_bonus
+    puts "#{@nom} inflige #{degats} points de dégâts"
+    return degats
   end
 
   def soin
-    # A faire:
-    # - Gagner de la vie
-    vie=20
-    # - Affiche ce qu'il s'est passé
-    @points_de_vie+=20
-    puts "#{nom} a augmenter sa vie de vie de 20 pv"
+    @points_de_vie += rand(10..25)
+    puts "#{@nom} s'est soigné et a gagné #{points_de_vie} points de vie"
   end
 
   def ameliorer_degats
-    # A faire:
-    # - Augmenter les dégats bonus
-    degats_bonus =25
-    # - Affiche ce qu'il s'est passé
-    puts "#{nom} a gagné 25 de dégats bonus"
-  end
+  # Si le joueur améliore son attaque, il recharge ses dégâts-bonus
+    @degats_bonus += rand(25)
+    puts "#{@nom} bénéficie de #{@degats_bonus} points de dégâts-bonus supplémentaires"
+end
 end
 
 class Ennemi < Personne
-  def degats
-    # A faire:
-    # - Calculer les dégats
-    degats=7
 
+  def degats
+    degats = rand(1..30)
+    puts "#{@nom} a provoqué #{degats} points de dégâts"
+    return degats
   end
+
 end
 
 class Jeu
+
   def self.actions_possibles(monde)
     puts "ACTIONS POSSIBLES :"
 
@@ -102,29 +98,23 @@ class Jeu
   end
 
   def self.est_fini(joueur, monde)
-    # A faire:
-    # - Déterminer la condition de fin du jeu
+  # Le jeu est fini si le joueur est vaincu ou s'il n'y a plus d'ennemis à vaincre
     return true if joueur.points_de_vie <=0 || monde.ennemis_en_vie.size <= 0
-    end
+  end
+
 end
+
 
 class Monde
   attr_accessor :ennemis
 
   def ennemis_en_vie
-    # A faire:
-    # - Ne retourner que les ennemis en vie
-    ennemis_en_vie=[]
-    ennemis.each do |ennemi|
-      if ennemi.en_vie=false
-        ennemis_en_vie<<ennemi
-        return ennemis_en_vie
-      end
-    end
+ # On n'affiche que les ennemis encore en vie
+    ennemis.select {|ennemi| ennemi.en_vie }
   end
 end
 
-##############
+################################################
 
 # Initialisation du monde
 monde = Monde.new
@@ -146,12 +136,13 @@ puts "\n\nAinsi débutent les aventures de #{joueur.nom}\n\n"
 100.times do |tour|
   puts "\n------------------ Tour numéro #{tour} ------------------"
 
-  # Affiche les différentes actions possibles
+# Affiche les différentes actions possibles
   Jeu.actions_possibles(monde)
 
   puts "\nQUELLE ACTION FAIRE ?"
   # On range dans la variable "choix" ce que l'utilisateur renseigne
   choix = gets.chomp.to_i
+
 
   # En fonction du choix on appelle différentes méthodes sur le joueur
   if choix == 0
@@ -161,7 +152,11 @@ puts "\n\nAinsi débutent les aventures de #{joueur.nom}\n\n"
   elsif choix == 99
     # On quitte la boucle de jeu si on a choisi
     # 99 qui veut dire "quitter"
+    puts "Vous avez choisi de quitter la partie. A une prochaine fois!"
     break
+  elsif choix >= 5 && choix < 99
+  	puts "Ce choix n'existe pas."
+  	Jeu.actions_possibles(monde)
   else
     # Choix - 2 car nous avons commencé à compter à partir de 2
     # car les choix 0 et 1 étaient réservés pour le soin et
@@ -173,23 +168,20 @@ puts "\n\nAinsi débutent les aventures de #{joueur.nom}\n\n"
   puts "\nLES ENNEMIS RIPOSTENT !"
   # Pour tous les ennemis en vie ...
   monde.ennemis_en_vie.each do |ennemi|
-    # ... le héro subit une attaque.
+    # ... le héros subit une attaque.
     ennemi.attaque(joueur)
   end
 
-  puts "\nEtat du héro: #{joueur.info}\n"
+  puts "\nEtat du héros: #{joueur.info}\n"
 
-  # Si le jeu est fini, on interompt la boucle
+# Si le jeu est fini, on interrompt la boucle
   break if Jeu.est_fini(joueur, monde)
 end
 
 puts "\nGame Over!\n"
 
-# A faire:
-# - Afficher le résultat de la partie
-
-if joueur.en_vie
-  puts "Vous avez gagné !"
-else
-  puts "Vous avez perdu !"
-end
+puts "Le résultat de la partie est :
+#{joueur.info} \n
+#{monde.ennemis[0].info} \n
+#{monde.ennemis[1].info} \n
+#{monde.ennemis[2].info} "
